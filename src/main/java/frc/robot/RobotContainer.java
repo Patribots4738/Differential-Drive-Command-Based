@@ -5,15 +5,16 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -29,7 +30,7 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
 
     // The driver's controller
-    XboxController driverController;
+    CommandXboxController driverController;
 
     SendableChooser<Command> autoSelector;
 
@@ -38,7 +39,7 @@ public class RobotContainer {
      */
     public RobotContainer() {
         drivetrain = new Drivetrain();
-        driverController = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+        driverController = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
         autoSelector = new SendableChooser<>();
 
         // Configure the button bindings
@@ -69,10 +70,9 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        // Drive at half speed when the right bumper is held
-        new JoystickButton(driverController, Button.kRightBumper.value)
-                .onTrue(new InstantCommand(() -> drivetrain.setMaxOutput(0.5)))
-                .onFalse(new InstantCommand(() -> drivetrain.setMaxOutput(1)));
+        Trigger leftStick = driverController.leftStick();
+        leftStick.toggleOnTrue(Commands.runOnce(() -> drivetrain.setMaxOutput(0.5)));
+        leftStick.toggleOnFalse(Commands.runOnce(() -> drivetrain.setMaxOutput(1)));
     }
 
     public void onEnabled() {

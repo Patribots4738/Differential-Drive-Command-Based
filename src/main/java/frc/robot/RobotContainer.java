@@ -55,6 +55,7 @@ public class RobotContainer {
                                 -driverController.getLeftY(), -driverController.getRightX()),
                         drivetrain));
 
+        // Add commands to the autonomous command chooser
         autoSelector.setDefaultOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
         SmartDashboard.putData(autoSelector);
 

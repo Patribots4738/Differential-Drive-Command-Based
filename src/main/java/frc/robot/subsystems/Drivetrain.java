@@ -214,22 +214,14 @@ public class Drivetrain extends SubsystemBase {
                 leftMotor2.restoreFactoryDefaults();
                 rightMotor1.restoreFactoryDefaults();
                 rightMotor2.restoreFactoryDefaults();
-            }).ignoringDisable(true).asProxy()
-            // Set the conversion factor for the encoders
-            .andThen(
-                () -> {
-                    leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
-                    rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
-                }).ignoringDisable(true).asProxy()
-            // Reset the encoders
-            .andThen(
-                () -> resetEncoders()
-            ).ignoringDisable(true).asProxy()
-            // Invert the left motors
-            .andThen(
-                () -> {
-                    leftMotors.setInverted(true);
-                    rightMotors.setInverted(false);
+        
+                leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
+                rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
+            
+                resetEncoders();
+                
+                leftMotors.setInverted(true);
+                rightMotors.setInverted(false);
                 }
             ).ignoringDisable(true).asProxy()
         );

@@ -30,7 +30,7 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
 
     // The driver's controller
-    CommandXboxController driverController;
+    CommandXboxController driver;
 
     SendableChooser<Command> autoSelector;
 
@@ -39,7 +39,7 @@ public class RobotContainer {
      */
     public RobotContainer() {
         drivetrain = new Drivetrain();
-        driverController = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+        driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
         autoSelector = new SendableChooser<>();
 
         // Configure the button bindings
@@ -52,7 +52,8 @@ public class RobotContainer {
                 // hand, and turning controlled by the right.
                 new RunCommand(
                         () -> drivetrain.drive(
-                                -driverController.getLeftY(), -driverController.getRightX()),
+                                driver.getLeftY(), 
+                                driver.getRightX()),
                         drivetrain));
 
         // Add commands to the autonomous command chooser
@@ -71,9 +72,9 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        Trigger leftStick = driverController.leftStick();
-        leftStick.toggleOnTrue(Commands.runOnce(() -> drivetrain.setMaxOutput(0.5)));
-        leftStick.toggleOnFalse(Commands.runOnce(() -> drivetrain.setMaxOutput(1)));
+        driver.leftStick().toggleOnTrue(
+            Commands.run(() -> drivetrain.setMaxOutput(0.5))
+                .finallyDo((end) -> drivetrain.setMaxOutput(1)));
     }
 
     public void onEnabled() {

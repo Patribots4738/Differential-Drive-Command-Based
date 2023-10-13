@@ -20,13 +20,13 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
  */
 public final class Constants {
     public static final class DriveConstants {
-        public static final int LEFT_MOTOR1_PORT = 0;
-        public static final int LEFT_MOTOR2_PORT = 1;
-        public static final int RIGHT_MOTOR1_PORT = 2;
-        public static final int RIGHT_MOTOR2_PORT = 3;
+        public static final int LEFT_MOTOR1_CAN_ID = 0;
+        public static final int LEFT_MOTOR2_CAN_ID = 1;
+        public static final int RIGHT_MOTOR1_CAN_ID = 2;
+        public static final int RIGHT_MOTOR2_CAN_ID = 3;
 
-        public static final int[] LEFT_ENCODER_PORT = new int[] { 0, 1 };
-        public static final int[] RIGHT_ENCODER_PORT = new int[] { 2, 3 };
+        public static final int[] LEFT_ENCODER_CAN_ID = new int[] { 0, 1 };
+        public static final int[] RIGHT_ENCODER_CAN_ID = new int[] { 2, 3 };
         public static final boolean LEFT_ENCODER_REVERSED = false;
         public static final boolean RIGHT_ENCODER_REVERSED = true;
 
@@ -34,11 +34,11 @@ public final class Constants {
         public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
                 TRACK_WIDTH_METERS);
 
-        public static final int ENCODER_CPR = 1024;
+        public static final double GEAR_RATIO = 5.95;
         public static final double WHEEL_DIAMETER_METERS = 0.15;
         public static final double ENCODER_POSITION_CONVERSION_FACTOR =
                 // Assumes the encoders are directly mounted on the wheel shafts
-                (WHEEL_DIAMETER_METERS * Math.PI) / (double) ENCODER_CPR;
+                (WHEEL_DIAMETER_METERS * Math.PI) / GEAR_RATIO;
 
         // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
         // These characterization values MUST be determined either experimentally or
@@ -57,7 +57,8 @@ public final class Constants {
 
     public static final class OIConstants {
         public static final int DRIVER_CONTROLLER_PORT = 0;
-        public static final int OPERATOR_CONTROLLER_PORT = 0;
+        public static final int OPERATOR_CONTROLLER_PORT = 1;
+        public static final double DRIVER_DEADZONE = 0.07;
     }
 
     public static final class AutoConstants {

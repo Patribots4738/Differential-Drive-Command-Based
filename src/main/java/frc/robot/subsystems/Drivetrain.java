@@ -44,10 +44,10 @@ public class Drivetrain extends SubsystemBase {
     /** Creates a new DriveSubsystem. */
     public Drivetrain() {
         // Define motors
-        leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_PORT, MotorType.kBrushless);
-        leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_PORT, MotorType.kBrushless);
-        rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_PORT, MotorType.kBrushless);
-        rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_PORT, MotorType.kBrushless);
+        leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_CAN_ID, MotorType.kBrushless);
+        leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_CAN_ID, MotorType.kBrushless);
+        rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_CAN_ID, MotorType.kBrushless);
+        rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_CAN_ID, MotorType.kBrushless);
         // Define motor groups
         leftMotors = new MotorControllerGroup(
             leftMotor1,

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,6 +32,7 @@ public class RobotContainer {
 
     // The driver's controller
     CommandXboxController driver;
+    CommandXboxController operator;
 
     SendableChooser<Command> autoSelector;
 
@@ -40,26 +42,31 @@ public class RobotContainer {
     public RobotContainer() {
         drivetrain = new Drivetrain();
         driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+        operator = new CommandXboxController(OIConstants.OPERATOR_CONTROLLER_PORT);
         autoSelector = new SendableChooser<>();
 
-        // Configure the button bindings
-        configureButtonBindings();
-
+        
         // Configure default commands
         // Set the default drive command to split-stick arcade drive
         drivetrain.setDefaultCommand(
-                // A split-stick arcade command, with forward/backward controlled by the left
-                // hand, and turning controlled by the right.
-                new RunCommand(
-                        () -> drivetrain.drive(
-                                driver.getLeftY(), 
-                                driver.getRightX()),
-                        drivetrain));
+            // A split-stick arcade command, with forward/backward controlled by the left
+            // hand, and turning controlled by the right.
+            new RunCommand(
+                () -> drivetrain.drive(
+                    MathUtil.applyDeadband(driver.getLeftY(), OIConstants.DRIVER_DEADZONE), 
+                    MathUtil.applyDeadband(driver.getRightX(), OIConstants.DRIVER_DEADZONE)),
+                    drivetrain));
+                    
+        // Configure the button bindings
+        configureButtonBindings();
 
         // Add commands to the autonomous command chooser
-        autoSelector.setDefaultOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
-        SmartDashboard.putData(autoSelector);
+        addAutos();
+    }
 
+    private void addAutos(){
+        autoSelector.addOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
+        SmartDashboard.putData(autoSelector);
     }
 
     /**

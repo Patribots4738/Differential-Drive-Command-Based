@@ -21,52 +21,52 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
+    // The motors on the drive.
+    private final CANSparkMax leftMotor1;
+    private final CANSparkMax leftMotor2;
+    private final CANSparkMax rightMotor1;
+    private final CANSparkMax rightMotor2;
     // The motors on the left side of the drive.
-    private final CANSparkMax leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_PORT, MotorType.kBrushless);
-    private final CANSparkMax leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_PORT, MotorType.kBrushless);
-    private final CANSparkMax rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_PORT, MotorType.kBrushless);
-    private final CANSparkMax rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_PORT, MotorType.kBrushless);
-
-    private final MotorControllerGroup leftMotors = new MotorControllerGroup(
-            leftMotor1,
-            leftMotor2);
-
+    private final MotorControllerGroup leftMotors;
     // The motors on the right side of the drive.
-    private final MotorControllerGroup rightMotors = new MotorControllerGroup(
-            rightMotor1,
-            rightMotor2);
-
+    private final MotorControllerGroup rightMotors;
     // The robot's drive
-    private final DifferentialDrive drive = new DifferentialDrive(leftMotors, rightMotors);
-
+    private final DifferentialDrive drivetrain;
     // The left-side drive encoder
-    private final RelativeEncoder leftEncoder = leftMotor1.getEncoder();
-
+    private final RelativeEncoder leftEncoder;
     // The right-side drive encoder
-    private final RelativeEncoder rightEncoder = rightMotor1.getEncoder();
-
+    private final RelativeEncoder rightEncoder;
     // The gyro sensor
-    private final ADIS16470_IMU gyro = new ADIS16470_IMU();
-
+    private final ADIS16470_IMU gyro;
     // Odometry class for tracking robot pose
     private final DifferentialDriveOdometry odometry;
 
     /** Creates a new DriveSubsystem. */
     public Drivetrain() {
-        // Define variables
-
-        // We need to invert one side of the drivetrain so that positive voltages
-        // result in both sides moving forward. Depending on how your robot's
-        // gearbox is constructed, you might have to invert the left side instead.
-        rightMotors.setInverted(true);
-
-        // Sets the distance per pulse for the encoders
-        leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
-        rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
-
-        resetEncoders();
+        // Define motors
+        leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_PORT, MotorType.kBrushless);
+        leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_PORT, MotorType.kBrushless);
+        rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_PORT, MotorType.kBrushless);
+        rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_PORT, MotorType.kBrushless);
+        // Define motor groups
+        leftMotors = new MotorControllerGroup(
+            leftMotor1,
+            leftMotor2);
+        rightMotors = new MotorControllerGroup(
+            rightMotor1,
+            rightMotor2);
+        // Define drivetrain
+        drivetrain = new DifferentialDrive(leftMotors, rightMotors);
+        // Define encoders
+        leftEncoder = leftMotor1.getEncoder();
+        rightEncoder = rightMotor1.getEncoder();
+        // Define gyro
+        gyro = new ADIS16470_IMU();
+        // Define odometry
         odometry = new DifferentialDriveOdometry(
                 getRotation2d(), leftEncoder.getPosition(), rightEncoder.getPosition());
+
+        scheduleConfigCommands();
     }
 
     @Override
@@ -112,7 +112,7 @@ public class Drivetrain extends SubsystemBase {
      * @param rot the commanded rotation
      */
     public void drive(double fwd, double rot) {
-        drive.arcadeDrive(fwd, rot);
+        drivetrain.arcadeDrive(fwd, rot);
     }
 
     /**
@@ -124,7 +124,7 @@ public class Drivetrain extends SubsystemBase {
     public void tankDriveVolts(double leftVolts, double rightVolts) {
         leftMotors.setVoltage(leftVolts);
         rightMotors.setVoltage(rightVolts);
-        drive.feed();
+        drivetrain.feed();
     }
 
     /** Resets the drive encoders to currently read a position of 0. */
@@ -167,7 +167,7 @@ public class Drivetrain extends SubsystemBase {
      * @param maxOutput the maximum output to which the drive will be constrained
      */
     public void setMaxOutput(double maxOutput) {
-        drive.setMaxOutput(maxOutput);
+        drivetrain.setMaxOutput(maxOutput);
     }
 
     /** Zeroes the heading of the robot. */
@@ -207,12 +207,32 @@ public class Drivetrain extends SubsystemBase {
      * is disabled.
      */
     public void scheduleConfigCommands() {
-        CommandScheduler.getInstance().schedule(new InstantCommand(() -> {
-            leftMotor1.restoreFactoryDefaults();
-            leftMotor2.restoreFactoryDefaults();
-            rightMotor1.restoreFactoryDefaults();
-            rightMotor2.restoreFactoryDefaults();
-        }).ignoringDisable(true));
+        CommandScheduler.getInstance().schedule(
+            // Restore factory defaults
+            new InstantCommand(() -> {
+                leftMotor1.restoreFactoryDefaults();
+                leftMotor2.restoreFactoryDefaults();
+                rightMotor1.restoreFactoryDefaults();
+                rightMotor2.restoreFactoryDefaults();
+            }).ignoringDisable(true).asProxy()
+            // Set the conversion factor for the encoders
+            .andThen(
+                () -> {
+                    leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
+                    rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
+                }).ignoringDisable(true).asProxy()
+            // Reset the encoders
+            .andThen(
+                () -> resetEncoders()
+            ).ignoringDisable(true).asProxy()
+            // Invert the left motors
+            .andThen(
+                () -> {
+                    leftMotors.setInverted(true);
+                    rightMotors.setInverted(false);
+                }
+            ).ignoringDisable(true).asProxy()
+        );
     }
 
     /**
@@ -220,7 +240,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public void resetRelativeRotationEncoders() {
         CommandScheduler.getInstance().schedule(
-                new InstantCommand(() -> resetEncoders()).ignoringDisable(false));
+                new InstantCommand(() -> resetEncoders()).ignoringDisable(false).asProxy());
     }
 
 }

@@ -26,17 +26,21 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
  */
 public class RobotContainer {
     // The robot's subsystems
-    private final Drivetrain drivetrain = new Drivetrain();
+    private final Drivetrain drivetrain;
 
     // The driver's controller
-    XboxController driverController = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+    XboxController driverController;
 
-    SendableChooser<Command> autoSelector = new SendableChooser<>();
+    SendableChooser<Command> autoSelector;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        drivetrain = new Drivetrain();
+        driverController = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+        autoSelector = new SendableChooser<>();
+
         // Configure the button bindings
         configureButtonBindings();
 

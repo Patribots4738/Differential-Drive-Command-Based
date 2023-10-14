@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import io.github.oblarg.oblog.Logger;
 
 /**
  * Do not change the name of this class or the package. This class is one of the main
@@ -33,6 +34,9 @@ public class Robot extends TimedRobot {
         // autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
         DriverStation.silenceJoystickConnectionWarning(true);
+
+        // Configure logging and config settings
+        Logger.configureLoggingAndConfig(robotContainer, false);
     }
 
     /**
@@ -55,6 +59,9 @@ public class Robot extends TimedRobot {
         // robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
+
+        // Update the logger
+        Logger.updateEntries();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */

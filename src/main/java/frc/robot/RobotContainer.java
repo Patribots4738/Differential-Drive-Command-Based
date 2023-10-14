@@ -5,10 +5,12 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Drivetrain;
+import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -33,6 +35,12 @@ public class RobotContainer {
     CommandXboxController operator;
 
     SendableChooser<Command> autoSelector;
+
+    
+    // This makes it very easy to add data to the dashboard, 
+    // just add {@Log} in the line above
+    @Log
+    private Field2d field = new Field2d();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -75,11 +83,24 @@ public class RobotContainer {
          */
         configureButtonBindings();
 
+        // Add the field to the dashboard
+        SmartDashboard.putData("Field", field);
+
         /*
          * add the autonomous commands to the auto selector, to then choose from
          * on the smart dashboard
          */
         addAutos();
+    }
+
+    /**
+     * This the the periodic method that is called every 20ms when the robot is
+     * enabled.
+     */
+    public void periodic() {
+
+        // Update the field
+        field.setRobotPose(drivetrain.getPose());
     }
 
     /**

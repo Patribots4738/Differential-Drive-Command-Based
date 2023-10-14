@@ -5,7 +5,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
@@ -15,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -45,25 +43,54 @@ public class RobotContainer {
         operator = new CommandXboxController(OIConstants.OPERATOR_CONTROLLER_PORT);
         autoSelector = new SendableChooser<>();
 
-        
-        // Configure default commands
-        // Set the default drive command to split-stick arcade drive
+        /*
+         * Configure the default command for the drivetrain subsystem, this is what
+         * will be run when no other commands are running that require the drivetrain.
+         */
         drivetrain.setDefaultCommand(
-            // A split-stick arcade command, with forward/backward controlled by the left
-            // hand, and turning controlled by the right.
+            /*
+             * This Run Command will drive our robot using arcade drive style, i.e. using
+             * the left stick to control forward/backward movement and the right stick to
+             * control turning.
+             * 
+             * <p>
+             * The Run Command is a command that will be scheduled through the 
+             * Command Scheduler and will run until it is canceled. 
+             */
             new RunCommand(
                 () -> drivetrain.drive(
                     MathUtil.applyDeadband(driver.getLeftY(), OIConstants.DRIVER_DEADZONE), 
                     MathUtil.applyDeadband(driver.getRightX(), OIConstants.DRIVER_DEADZONE)),
                     drivetrain));
                     
-        // Configure the button bindings
+        /*
+         * Configure the button bindings,
+         * this is where you choose which commands are bound to which controller
+         * buttons/axis, etc... 
+         * 
+         * <p>
+         * This is one of the main points of the Command Based framework,
+         * it allows you to easily change which commands are bound to which
+         * buttons/axis, without changing the commands themselves.
+         */
         configureButtonBindings();
 
-        // Add commands to the autonomous command chooser
+        /*
+         * add the autonomous commands to the auto selector, to then choose from
+         * on the smart dashboard
+         */
         addAutos();
     }
 
+    /**
+     * Add the autonomous commands to the auto selector, to then choose from
+     * on the smart dashboard
+     * 
+     * <p>
+     * This is where you add your autonomous commands to the auto selector
+     * (A default command is already added for you that drives 
+     * forward for 2 seconds at max speed)
+     */
     private void addAutos(){
         autoSelector.addOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
         SmartDashboard.putData(autoSelector);
@@ -74,7 +101,7 @@ public class RobotContainer {
      * created by
      * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its
      * subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling
+     * edu.wpi.first.wpilibj.Joystick} or {@link CommandXboxController}), and then calling
      * passing it to a
      * {@link JoystickButton}.
      */
@@ -84,10 +111,18 @@ public class RobotContainer {
                 .finallyDo((end) -> drivetrain.setMaxOutput(1)));
     }
 
+    /*
+     * The onEnabled method is called when the robot is enabled,
+     * and is used to reset sensors, etc...
+     */
     public void onEnabled() {
         drivetrain.resetRelativeRotationEncoders();
     }
 
+    /*
+     * The onDisabled method is called when the robot is disabled,
+     * and is used to config our motors for our drive, etc...
+     */
     public void onDisabled() {
         drivetrain.scheduleConfigCommands();
     }

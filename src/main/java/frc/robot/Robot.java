@@ -10,13 +10,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
- * build.gradle file in the
- * project.
+ * Do not change the name of this class or the package. This class is one of the main
+ * entry points to the robot code and is specified as such in the build.gradle file.
+ * 
+ * if you change the name of this class or the package, you will need to update the
+ * build.gradle file to match. (BUT DON'T DO THAT)
  */
 public class Robot extends TimedRobot {
     private Command autonomousCommand;
@@ -75,14 +73,11 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        autonomousCommand = robotContainer.getAutonomousCommand();
-
         /*
-         * String autoSelected = SmartDashboard.getString("Auto Selector",
-         * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-         * = new MyAutoCommand(); break; case "Default Auto": default:
-         * autonomousCommand = new ExampleCommand(); break; }
+         * This will get the selected command from Smart Dashboard and
+         * will run it.
          */
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
         if (autonomousCommand != null) {
@@ -92,10 +87,16 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        // This makes sure that the autonomous stops running when
-        // teleop starts running. If you want the autonomous to
-        // continue until interrupted by another command, remove
-        // this line or comment it out.
+        /*
+         * This makes sure that the autonomous stops running when
+         * teleop starts running. 
+         * 
+         * <p>
+         * The onEnabled() method of the {@link RobotContainer} class
+         * is called here. This is where you would put code that you
+         * want to run when the robot is enabled, such as resetting
+         * sensors, etc...
+         */
         robotContainer.onEnabled();
         if (autonomousCommand != null)
             autonomousCommand.cancel();

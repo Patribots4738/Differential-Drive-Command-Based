@@ -19,6 +19,11 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    /*
+     * TAKE NOTE: This is a template file. It is intended to be copied and renamed
+     * for each new robot and the constants adjusted as needed. It is not intended
+     * to be used directly as the Constants class for a robot.
+     */
     public static final class DriveConstants {
         public static final int LEFT_MOTOR1_CAN_ID = 0;
         public static final int LEFT_MOTOR2_CAN_ID = 1;
@@ -40,13 +45,11 @@ public final class Constants {
                 // Assumes the encoders are directly mounted on the wheel shafts
                 (WHEEL_DIAMETER_METERS * Math.PI) / GEAR_RATIO;
 
-        // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
-        // These characterization values MUST be determined either experimentally or
-        // theoretically
-        // for *your* robot's drive.
-        // The Robot Characterization Toolsuite provides a convenient tool for obtaining
-        // these
-        // values for your robot.
+        /*
+         * These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT! These
+         * characterization values MUST be determined either experimentally or
+         * theoretically for *your* robot's drive.
+         */        
         public static final double ks_VOLTS = 0.22;
         public static final double kv_VOLT_SECONDS_PER_METER = 1.98;
         public static final double ka_VOLT_SECONDS_SQUARED_PER_METER = 0.2;
@@ -58,6 +61,9 @@ public final class Constants {
     public static final class OIConstants {
         public static final int DRIVER_CONTROLLER_PORT = 0;
         public static final int OPERATOR_CONTROLLER_PORT = 1;
+        // Deadzone for the driver's controller
+        //(must be tuned for the driver's controller and 
+        // driving style)
         public static final double DRIVER_DEADZONE = 0.07;
     }
 

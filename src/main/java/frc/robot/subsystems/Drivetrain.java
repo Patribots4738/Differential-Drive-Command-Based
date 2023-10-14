@@ -21,6 +21,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drivetrain extends SubsystemBase {
+    /*
+     * This is were you define all the components of the subsystem. For example, if
+     * your robot had two motors on the left side and two motors on the right side,
+     * you would define them here.
+     */
+
     // The motors on the drive.
     private final CANSparkMax leftMotor1;
     private final CANSparkMax leftMotor2;
@@ -43,32 +49,54 @@ public class Drivetrain extends SubsystemBase {
 
     /** Creates a new DriveSubsystem. */
     public Drivetrain() {
-        // Define motors
+        /*
+         * This is were you would initialize the motors etc... and (if needed)
+         * invert them. For example, if your robot had two motors on the left side and
+         * two motors on the right side, you would need to reverse one side so that
+         * positive makes them both go forward.
+         */
+        // Initialize motors
         leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_CAN_ID, MotorType.kBrushless);
         leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_CAN_ID, MotorType.kBrushless);
         rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_CAN_ID, MotorType.kBrushless);
         rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_CAN_ID, MotorType.kBrushless);
-        // Define motor groups
+        // Initialize motor groups
         leftMotors = new MotorControllerGroup(
             leftMotor1,
             leftMotor2);
         rightMotors = new MotorControllerGroup(
             rightMotor1,
             rightMotor2);
-        // Define drivetrain
+        // Initialize drivetrain
         drivetrain = new DifferentialDrive(leftMotors, rightMotors);
-        // Define encoders
+        // Initialize encoders
         leftEncoder = leftMotor1.getEncoder();
         rightEncoder = rightMotor1.getEncoder();
-        // Define gyro
+        // Initialize gyro
         gyro = new ADIS16470_IMU();
-        // Define odometry
+        // Initialize odometry
         odometry = new DifferentialDriveOdometry(
                 getRotation2d(), leftEncoder.getPosition(), rightEncoder.getPosition());
 
+        /*
+         * This is where the config commands are scheduled.
+         * This is done different places in different codebases.
+         *  
+         * <p>
+         * This is where you would configure the motors, set their inversion,
+         * set the sensors to their starting states, etc...
+         */
         scheduleConfigCommands();
     }
 
+    /*
+     * This is the periodic method. This is where you would put code that you want
+     * to run periodically, such as reading sensors and updating the motors.
+     * 
+     * <p>
+     * This method is called every 20ms when the robot is enabled.
+     * The odometry is the robot's position on the field.
+     */
     @Override
     public void periodic() {
         // Update the odometry in the periodic block
@@ -117,7 +145,11 @@ public class Drivetrain extends SubsystemBase {
 
     /**
      * Controls the left and right sides of the drive directly with voltages.
-     *
+     * 
+     * <p>
+     * This method is mainly used for autonomous driving.
+     * One example is in the PPRamseteCommand.
+     * 
      * @param leftVolts  the commanded left output
      * @param rightVolts the commanded right output
      */

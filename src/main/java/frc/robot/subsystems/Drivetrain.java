@@ -13,14 +13,22 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.simulation.ADIS16470_IMUSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,6 +59,13 @@ public class Drivetrain extends SubsystemBase {
     private final ADIS16470_IMU gyro;
     // Odometry class for tracking robot pose
     private final DifferentialDriveOdometry odometry;
+
+    public DifferentialDrivetrainSim drivetrainSimulator;
+    private final Field2d simField;
+    private final EncoderSim leftEncoderSim;
+    private final EncoderSim rightEncoderSim;
+    private final ADIS16470_IMUSim gyroSim;
+
 
     /** Creates a new DriveSubsystem. */
     public Drivetrain() {
@@ -91,6 +106,32 @@ public class Drivetrain extends SubsystemBase {
             new ReplanningConfig(), // Default path replanning config. See the API for the options here
             this // Reference to this subsystem to set requirements
         );
+
+        // TODO: Work on Sim stuff:
+        // https://github.com/wpilibsuite/allwpilib/blob/main/wpilibjExamples/src/main/java/edu/wpi/first/wpilibj/examples/statespacedifferentialdrivesimulation/subsystems/DriveSubsystem.java
+        if (RobotBase.isSimulation()){
+            drivetrainSimulator = new DifferentialDrivetrainSim(
+                DriveConstants.DRIVETRIAN_PLANT,
+                DriveConstants.GEARBOX,
+                DriveConstants.GEAR_RATIO,
+                DriveConstants.TRACK_WIDTH_METERS,
+                (DriveConstants.WHEEL_DIAMETER_METERS / 2.0) / 2.0,
+                VecBuilder.fill(0, 0, 0.0001, 0.1, 0.1, 0.005, 0.005)
+            );
+            
+            // TODO: Check if this is correct: (Encoder) leftEncoder and (Encoder) rightEncoder
+            leftEncoderSim = new EncoderSim((Encoder) leftEncoder);
+            rightEncoderSim = new EncoderSim((Encoder) rightEncoder);
+            gyroSim = new ADIS16470_IMUSim(gyro);
+
+            simField = new Field2d();
+            SmartDashboard.putData("Field", simField);
+        } else {
+            leftEncoderSim = null;
+            rightEncoderSim = null;
+            gyroSim = null;
+            simField = null;
+        }
 
         /*
          * This is where the config commands are scheduled.

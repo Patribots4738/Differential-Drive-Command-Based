@@ -5,6 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -30,15 +34,12 @@ public final class Constants {
         public static final int RIGHT_MOTOR1_CAN_ID = 2;
         public static final int RIGHT_MOTOR2_CAN_ID = 3;
 
-        public static final int[] LEFT_ENCODER_CAN_ID = new int[] { 0, 1 };
-        public static final int[] RIGHT_ENCODER_CAN_ID = new int[] { 2, 3 };
-        public static final boolean LEFT_ENCODER_REVERSED = false;
-        public static final boolean RIGHT_ENCODER_REVERSED = true;
-
+        // TODO: Tune this value
         public static final double TRACK_WIDTH_METERS = 0.69;
         public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
                 TRACK_WIDTH_METERS);
 
+        // TODO: Tune these values for your drive
         public static final double GEAR_RATIO = 5.95;
         public static final double WHEEL_DIAMETER_METERS = 0.15;
         public static final double ENCODER_POSITION_CONVERSION_FACTOR =
@@ -50,12 +51,27 @@ public final class Constants {
          * characterization values MUST be determined either experimentally or
          * theoretically for *your* robot's drive.
          */        
+        //TODO: Tune this value
         public static final double ks_VOLTS = 0.22;
         public static final double kv_VOLT_SECONDS_PER_METER = 1.98;
         public static final double ka_VOLT_SECONDS_SQUARED_PER_METER = 0.2;
 
         // Example value only - as above, this must be tuned for your drive!
+        //TODO: Tune this value
         public static final double kp_DRIVE_VEL = 8.5;
+        
+        //TODO: Tune these values
+        private static final double kv_VOLT_SECONDS_PER_RADIAN = 1.5;
+        private static final double ka_VOLT_SECONDS_SQUARED_PER_RADIAN = 0.3;
+        public static final LinearSystem<N2, N2, N2> DRIVETRIAN_PLANT = 
+            LinearSystemId.identifyDrivetrainSystem(
+                kv_VOLT_SECONDS_PER_METER,
+                ka_VOLT_SECONDS_SQUARED_PER_METER,
+                kv_VOLT_SECONDS_PER_RADIAN,
+                ka_VOLT_SECONDS_SQUARED_PER_RADIAN
+            );
+        //TODO: What should this be?
+        public static final DCMotor GEARBOX = null;
     }
 
     public static final class OIConstants {

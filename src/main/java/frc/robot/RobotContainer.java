@@ -49,8 +49,8 @@ public class RobotContainer {
      */
     public RobotContainer() {
         drivetrain = new Drivetrain();
-        driver = new CommandXboxController(OIConstants.DRIVER_CONTROLLER_PORT);
-        operator = new CommandXboxController(OIConstants.OPERATOR_CONTROLLER_PORT);
+        driver = new CmdPatriBoxController(OIConstants.DRIVER_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
+        operator = new CmdPatriBoxController(OIConstants.OPERATOR_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
         autoSelector = new SendableChooser<>();
 
         /*
@@ -69,8 +69,8 @@ public class RobotContainer {
              */
             new RunCommand(
                 () -> drivetrain.drive(
-                    MathUtil.applyDeadband(driver.getLeftY(), OIConstants.DRIVER_DEADZONE), 
-                    MathUtil.applyDeadband(driver.getRightX(), OIConstants.DRIVER_DEADZONE)),
+                    driver.getLeftY(),
+                    driver.getRightX()),
                     drivetrain));
 
         // Register the PathPlanner commands that are used in the event path

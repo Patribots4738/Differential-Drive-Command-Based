@@ -12,7 +12,6 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,6 +20,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -59,7 +59,7 @@ public class Drivetrain extends SubsystemBase {
     private final ADIS16470_IMU gyro;
     // Odometry class for tracking robot pose
     private final DifferentialDriveOdometry odometry;
-
+    // Things for sim stuff
     public DifferentialDrivetrainSim drivetrainSimulator;
     private final Field2d simField;
     private final EncoderSim leftEncoderSim;
@@ -107,26 +107,32 @@ public class Drivetrain extends SubsystemBase {
             this // Reference to this subsystem to set requirements
         );
 
-        // TODO: Work on Sim stuff:
-        // https://github.com/wpilibsuite/allwpilib/blob/main/wpilibjExamples/src/main/java/edu/wpi/first/wpilibj/examples/statespacedifferentialdrivesimulation/subsystems/DriveSubsystem.java
-        if (RobotBase.isSimulation()){
+        if (RobotBase.isSimulation()) {
             drivetrainSimulator = new DifferentialDrivetrainSim(
                 DriveConstants.DRIVETRIAN_PLANT,
                 DriveConstants.GEARBOX,
                 DriveConstants.GEAR_RATIO,
                 DriveConstants.TRACK_WIDTH_METERS,
-                (DriveConstants.WHEEL_DIAMETER_METERS / 2.0) / 2.0,
+                (DriveConstants.WHEEL_DIAMETER_METERS / 2.0),
                 VecBuilder.fill(0, 0, 0.0001, 0.1, 0.1, 0.005, 0.005)
             );
-            
-            // TODO: Check if this is correct: (Encoder) leftEncoder and (Encoder) rightEncoder
-            leftEncoderSim = new EncoderSim((Encoder) leftEncoder);
-            rightEncoderSim = new EncoderSim((Encoder) rightEncoder);
+
+            leftEncoderSim = new EncoderSim(new Encoder(
+                DriveConstants.LEFT_MOTOR1_CAN_ID, 
+                DriveConstants.LEFT_MOTOR2_CAN_ID,
+                DriveConstants.ENCODER_REVERSED));
+
+            rightEncoderSim = new EncoderSim(new Encoder(
+                DriveConstants.RIGHT_MOTOR1_CAN_ID, 
+                DriveConstants.RIGHT_MOTOR2_CAN_ID,
+                DriveConstants.ENCODER_REVERSED));
+
             gyroSim = new ADIS16470_IMUSim(gyro);
 
             simField = new Field2d();
             SmartDashboard.putData("Field", simField);
         } else {
+            drivetrainSimulator = null;
             leftEncoderSim = null;
             rightEncoderSim = null;
             gyroSim = null;
@@ -160,6 +166,31 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * This is a substitute for the method above
+     */
+    @Override
+    public void simulationPeriodic() {
+        drivetrainSimulator.setInputs(
+            leftMotors.get() * RobotController.getBatteryVoltage(),
+            rightMotors.get() * RobotController.getBatteryVoltage());
+
+        drivetrainSimulator.update(0.02);
+
+        leftEncoderSim.setDistance(drivetrainSimulator.getLeftPositionMeters());
+        leftEncoderSim.setRate(drivetrainSimulator.getLeftVelocityMetersPerSecond());
+        rightEncoderSim.setDistance(drivetrainSimulator.getRightPositionMeters());
+        rightEncoderSim.setRate(drivetrainSimulator.getRightVelocityMetersPerSecond());
+        gyroSim.setGyroAngleY(-drivetrainSimulator.getHeading().getDegrees());
+    }
+
+    /**
+     * @return The current draw of the drivetrain in amps.
+     */
+    public double getDrawnCurrentAmps(){
+        return drivetrainSimulator.getCurrentDrawAmps();
+    }
+
+    /**
      * Returns the currently-estimated pose of the robot.
      *
      * @return The pose.
@@ -187,8 +218,12 @@ public class Drivetrain extends SubsystemBase {
      */
     public void resetOdometry(Pose2d pose) {
         resetEncoders();
+        drivetrainSimulator.setPose(pose);
         odometry.resetPosition(
-                getRotation2d(), leftEncoder.getPosition(), rightEncoder.getPosition(), pose);
+                getRotation2d(), 
+                leftEncoder.getPosition(), 
+                rightEncoder.getPosition(), 
+                pose);
     }
 
     /**

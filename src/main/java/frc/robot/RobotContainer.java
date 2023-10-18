@@ -97,6 +97,14 @@ public class RobotContainer {
          */
         addAutos();
     }
+    
+    /**
+     * Get the drivetrain subsystem
+     * @return the drivetrain subsystem
+     */
+    public Drivetrain getDrivetrain(){
+        return drivetrain;
+    }
 
     /**
      * This the the periodic method that is called every 20ms when the robot is

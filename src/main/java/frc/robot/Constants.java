@@ -71,7 +71,8 @@ public final class Constants {
                 ka_VOLT_SECONDS_SQUARED_PER_RADIAN
             );
         //TODO: What should this be?
-        public static final DCMotor GEARBOX = null;
+        public static final DCMotor GEARBOX = DCMotor.getNEO(1);
+        public static final boolean ENCODER_REVERSED = false;
     }
 
     public static final class OIConstants {

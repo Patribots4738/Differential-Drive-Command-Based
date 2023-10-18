@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathPlannerTrajectory;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -13,7 +15,9 @@ import frc.robot.subsystems.Drivetrain;
 import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
@@ -115,6 +119,26 @@ public class RobotContainer {
     private void addAutos(){
         autoSelector.addOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
         SmartDashboard.putData(autoSelector);
+    }
+
+    /**
+     * load the path from the path planner, and return a ramsete command
+     * @param pathName the name of the path to load
+     * @param constraints the constraints to use for the path {@link PathConstraints}
+     * @return the ramsete command
+     */
+    public PPRamseteCommand loadPath(String pathName, PathConstraints constraints){
+        PathPlannerTrajectory trajectory = PathPlanner.loadPath(pathName, constraints);
+        PPRamseteCommand command = new PPRamseteCommand(
+          trajectory,
+          drivetrain::getPose,
+          drivetrain.getRamseteController(),
+          drivetrain.getKinematics(),
+          drivetrain::tankDriveVolts,
+          drivetrain
+        );
+
+        return command;
     }
 
     /**

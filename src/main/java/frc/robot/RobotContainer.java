@@ -4,8 +4,8 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.path.PathPlannerTrajectory;
-
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -15,9 +15,7 @@ import frc.robot.subsystems.Drivetrain;
 import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
@@ -74,7 +72,10 @@ public class RobotContainer {
                     MathUtil.applyDeadband(driver.getLeftY(), OIConstants.DRIVER_DEADZONE), 
                     MathUtil.applyDeadband(driver.getRightX(), OIConstants.DRIVER_DEADZONE)),
                     drivetrain));
-                    
+
+        // Register the PathPlanner commands that are used in the event path
+        registerPPComands();
+
         /*
          * Configure the button bindings,
          * this is where you choose which commands are bound to which controller
@@ -108,6 +109,13 @@ public class RobotContainer {
     }
 
     /**
+     * Register the PathPlanner commands that are used in the event path
+     */
+    private void registerPPComands(){
+        NamedCommands.registerCommand("autoBalance", null); 
+    }
+
+    /**
      * Add the autonomous commands to the auto selector, to then choose from
      * on the smart dashboard
      * 
@@ -117,28 +125,15 @@ public class RobotContainer {
      * forward for 2 seconds at max speed)
      */
     private void addAutos(){
-        autoSelector.addOption("DEFAULT", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
+        // Here is an example using PathPlanner
+        autoSelector.setDefaultOption("DEFAULT", new PathPlannerAuto("DEFAULT"));
+        // Here is an example not using PathPlanner
+        autoSelector.addOption("MOBILITY", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
+        // Here is an example using PathPlanner with events and a named command
+        autoSelector.addOption("anotherAuto", drivetrain.followPathCommand("anotherAuto"));
+        autoSelector.addOption("anotherAutoWithEvents", drivetrain.followEventPathCommand("anotherAutoWithEvents"));
+        
         SmartDashboard.putData(autoSelector);
-    }
-
-    /**
-     * load the path from the path planner, and return a ramsete command
-     * @param pathName the name of the path to load
-     * @param constraints the constraints to use for the path {@link PathConstraints}
-     * @return the ramsete command
-     */
-    public PPRamseteCommand loadPath(String pathName, PathConstraints constraints){
-        PathPlannerTrajectory trajectory = PathPlanner.loadPath(pathName, constraints);
-        PPRamseteCommand command = new PPRamseteCommand(
-          trajectory,
-          drivetrain::getPose,
-          drivetrain.getRamseteController(),
-          drivetrain.getKinematics(),
-          drivetrain::tankDriveVolts,
-          drivetrain
-        );
-
-        return command;
     }
 
     /**

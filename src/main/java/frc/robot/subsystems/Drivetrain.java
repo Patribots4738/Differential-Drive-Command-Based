@@ -4,14 +4,19 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathRamsete;
+import com.pathplanner.lib.commands.FollowPathWithEvents;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants.DriveConstants;
@@ -78,6 +83,15 @@ public class Drivetrain extends SubsystemBase {
         odometry = new DifferentialDriveOdometry(
                 getRotation2d(), leftEncoder.getPosition(), rightEncoder.getPosition());
 
+        AutoBuilder.configureRamsete(
+            this::getPose, // Robot pose supplier
+            this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getWheelSpeeds, // Current ChassisSpeeds supplier
+            this::tankDriveChassisSpeeds, // Method that will drive the robot given ChassisSpeeds
+            new ReplanningConfig(), // Default path replanning config. See the API for the options here
+            this // Reference to this subsystem to set requirements
+        );
+
         /*
          * This is where the config commands are scheduled.
          * This is done different places in different codebases.
@@ -118,8 +132,11 @@ public class Drivetrain extends SubsystemBase {
      *
      * @return The current wheel speeds.
      */
-    public DifferentialDriveWheelSpeeds getWheelSpeeds() {
-        return new DifferentialDriveWheelSpeeds(leftEncoder.getVelocity(), rightEncoder.getVelocity());
+    public ChassisSpeeds getWheelSpeeds() {
+        return new ChassisSpeeds(
+            leftEncoder.getVelocity(), 
+            rightEncoder.getVelocity(), 
+            getTurnRate());
     }
 
     /**
@@ -156,6 +173,13 @@ public class Drivetrain extends SubsystemBase {
     public void tankDriveVolts(double leftVolts, double rightVolts) {
         leftMotors.setVoltage(leftVolts);
         rightMotors.setVoltage(rightVolts);
+        drivetrain.feed();
+    }
+
+    public void tankDriveChassisSpeeds(ChassisSpeeds speeds) {
+        var wheelSpeeds = DriveConstants.DRIVE_KINEMATICS.toWheelSpeeds(speeds);
+        leftMotors.set(wheelSpeeds.leftMetersPerSecond);
+        rightMotors.set(wheelSpeeds.rightMetersPerSecond);
         drivetrain.feed();
     }
 
@@ -233,6 +257,36 @@ public class Drivetrain extends SubsystemBase {
     public double getTurnRate() {
         return -gyro.getRate();
     }
+
+    public FollowPathRamsete followPathCommand(String pathName){
+        var path = PathPlannerPath.fromPathFile(pathName);
+
+        return new FollowPathRamsete(
+            path,
+            this::getPose,
+            this::getWheelSpeeds,
+            this::tankDriveChassisSpeeds,
+            new ReplanningConfig(),
+            this
+        );
+    }
+
+    public FollowPathWithEvents followEventPathCommand(String pathName){
+        var path = PathPlannerPath.fromPathFile(pathName);
+
+        return new FollowPathWithEvents(
+            new FollowPathRamsete(
+                path,
+                this::getPose,
+                this::getWheelSpeeds,
+                this::tankDriveChassisSpeeds,
+                new ReplanningConfig(),
+                this
+            ), 
+            path, 
+            this::getPose);        
+    }
+    
 
     /**
      * Schedules the config commands to run. This should be run every time the robot

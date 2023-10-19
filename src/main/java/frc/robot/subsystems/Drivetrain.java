@@ -41,14 +41,10 @@ public class Drivetrain extends SubsystemBase {
      */
 
     // The motors on the drive.
-    private final CANSparkMax leftMotor1;
-    private final CANSparkMax leftMotor2;
-    private final CANSparkMax rightMotor1;
-    private final CANSparkMax rightMotor2;
-    // The motors on the left side of the drive.
-    private final MotorControllerGroup leftMotors;
-    // The motors on the right side of the drive.
-    private final MotorControllerGroup rightMotors;
+    private final CANSparkMax leftMotorLead;
+    private final CANSparkMax leftMotorFollower;
+    private final CANSparkMax rightMotorLead;
+    private final CANSparkMax rightMotorFollower;
     // The robot's drive
     private final DifferentialDrive drivetrain;
     // The left-side drive encoder
@@ -76,22 +72,15 @@ public class Drivetrain extends SubsystemBase {
          * positive makes them both go forward.
          */
         // Initialize motors
-        leftMotor1 = new CANSparkMax(DriveConstants.LEFT_MOTOR1_CAN_ID, MotorType.kBrushless);
-        leftMotor2 = new CANSparkMax(DriveConstants.LEFT_MOTOR2_CAN_ID, MotorType.kBrushless);
-        rightMotor1 = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_CAN_ID, MotorType.kBrushless);
-        rightMotor2 = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_CAN_ID, MotorType.kBrushless);
-        // Initialize motor groups
-        leftMotors = new MotorControllerGroup(
-            leftMotor1,
-            leftMotor2);
-        rightMotors = new MotorControllerGroup(
-            rightMotor1,
-            rightMotor2);
+        leftMotorLead = new CANSparkMax(DriveConstants.LEFT_MOTOR1_CAN_ID, MotorType.kBrushless);
+        leftMotorFollower = new CANSparkMax(DriveConstants.LEFT_MOTOR2_CAN_ID, MotorType.kBrushless);
+        rightMotorLead = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_CAN_ID, MotorType.kBrushless);
+        rightMotorFollower = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_CAN_ID, MotorType.kBrushless);
         // Initialize drivetrain
-        drivetrain = new DifferentialDrive(leftMotors, rightMotors);
+        drivetrain = new DifferentialDrive(rightMotorLead, leftMotorLead);
         // Initialize encoders
-        leftEncoder = leftMotor1.getEncoder();
-        rightEncoder = rightMotor1.getEncoder();
+        leftEncoder = leftMotorLead.getEncoder();
+        rightEncoder = rightMotorLead.getEncoder();
         // Initialize gyro
         gyro = new ADIS16470_IMU();
         // Initialize odometry
@@ -130,7 +119,7 @@ public class Drivetrain extends SubsystemBase {
             gyroSim = new ADIS16470_IMUSim(gyro);
 
             simField = new Field2d();
-            SmartDashboard.putData("Field", simField);
+            // SmartDashboard.putData("Field", simField);
         } else {
             drivetrainSimulator = null;
             leftEncoderSim = null;
@@ -161,8 +150,12 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         // Update the odometry in the periodic block
-        odometry.update(
-                getRotation2d(), leftEncoder.getPosition(), rightEncoder.getPosition());
+        CommandScheduler.getInstance().schedule(
+          new InstantCommand(() -> odometry.update(
+            getRotation2d(), 
+            leftEncoder.getPosition(), 
+            rightEncoder.getPosition()))
+        );
     }
 
     /**
@@ -171,8 +164,8 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void simulationPeriodic() {
         drivetrainSimulator.setInputs(
-            leftMotors.get() * RobotController.getBatteryVoltage(),
-            rightMotors.get() * RobotController.getBatteryVoltage());
+            leftMotorLead.get() * RobotController.getBatteryVoltage(),
+            rightMotorLead.get() * RobotController.getBatteryVoltage());
 
         drivetrainSimulator.update(0.02);
 
@@ -247,15 +240,15 @@ public class Drivetrain extends SubsystemBase {
      * @param rightVolts the commanded right output
      */
     public void tankDriveVolts(double leftVolts, double rightVolts) {
-        leftMotors.setVoltage(leftVolts);
-        rightMotors.setVoltage(rightVolts);
+        leftMotorLead.setVoltage(leftVolts);
+        rightMotorLead.setVoltage(rightVolts);
         drivetrain.feed();
     }
 
     public void tankDriveChassisSpeeds(ChassisSpeeds speeds) {
         var wheelSpeeds = DriveConstants.DRIVE_KINEMATICS.toWheelSpeeds(speeds);
-        leftMotors.set(wheelSpeeds.leftMetersPerSecond);
-        rightMotors.set(wheelSpeeds.rightMetersPerSecond);
+        leftMotorLead.set(wheelSpeeds.leftMetersPerSecond);
+        rightMotorLead.set(wheelSpeeds.rightMetersPerSecond);
         drivetrain.feed();
     }
 
@@ -372,19 +365,22 @@ public class Drivetrain extends SubsystemBase {
         CommandScheduler.getInstance().schedule(
             // Restore factory defaults
             new InstantCommand(() -> {
-                leftMotor1.restoreFactoryDefaults();
-                leftMotor2.restoreFactoryDefaults();
-                rightMotor1.restoreFactoryDefaults();
-                rightMotor2.restoreFactoryDefaults();
+                leftMotorLead.restoreFactoryDefaults();
+                leftMotorFollower.restoreFactoryDefaults();
+                rightMotorLead.restoreFactoryDefaults();
+                rightMotorFollower.restoreFactoryDefaults();
+
+                leftMotorLead.setInverted(DriveConstants.LEFT_MOTOR_INVERT);
+                rightMotorLead.setInverted(DriveConstants.RIGHT_MOTOR_INVERT);
         
                 leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
                 rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
             
                 resetEncoders();
-                
-                leftMotors.setInverted(true);
-                rightMotors.setInverted(false);
-                }
+
+                leftMotorFollower.follow(leftMotorLead, DriveConstants.FOLLOWER_INVERT);
+                rightMotorFollower.follow(rightMotorLead, DriveConstants.FOLLOWER_INVERT);
+              }
             ).ignoringDisable(true).asProxy()
         );
     }

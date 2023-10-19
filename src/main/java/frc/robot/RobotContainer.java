@@ -14,7 +14,9 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Drivetrain;
 import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -51,7 +53,26 @@ public class RobotContainer {
         drivetrain = new Drivetrain();
         driver = new CmdPatriBoxController(OIConstants.DRIVER_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
         operator = new CmdPatriBoxController(OIConstants.OPERATOR_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
-        autoSelector = new SendableChooser<>();
+        
+        // autoSelector = new SendableChooser<>();
+
+        registerPPComands();
+
+        // Add the field to the dashboard
+        // SmartDashboard.putData("Field", field);
+
+        /*
+         * Configure the button bindings,
+         * this is where you choose which commands are bound to which controller
+         * buttons/axis, etc... 
+         * 
+         * <p>
+         * This is one of the main points of the Command Based framework,
+         * it allows you to easily change which commands are bound to which
+         * buttons/axis, without changing the commands themselves.
+         */
+        configureButtonBindings();
+
 
         /*
          * Configure the default command for the drivetrain subsystem, this is what
@@ -69,27 +90,11 @@ public class RobotContainer {
              */
             new RunCommand(
                 () -> drivetrain.drive(
-                    driver.getLeftY(),
-                    driver.getRightX()),
+                         driver.getLeftY(),
+                         driver.getRightX()),
                     drivetrain));
 
         // Register the PathPlanner commands that are used in the event path
-        registerPPComands();
-
-        /*
-         * Configure the button bindings,
-         * this is where you choose which commands are bound to which controller
-         * buttons/axis, etc... 
-         * 
-         * <p>
-         * This is one of the main points of the Command Based framework,
-         * it allows you to easily change which commands are bound to which
-         * buttons/axis, without changing the commands themselves.
-         */
-        configureButtonBindings();
-
-        // Add the field to the dashboard
-        SmartDashboard.putData("Field", field);
 
         /*
          * add the autonomous commands to the auto selector, to then choose from
@@ -113,7 +118,7 @@ public class RobotContainer {
     public void periodic() {
 
         // Update the field
-        field.setRobotPose(drivetrain.getPose());
+        field.setRobotPose(drivetrain.getPose()); 
     }
 
     /**

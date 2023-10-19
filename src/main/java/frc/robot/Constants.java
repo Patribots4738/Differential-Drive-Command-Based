@@ -29,10 +29,10 @@ public final class Constants {
      * to be used directly as the Constants class for a robot.
      */
     public static final class DriveConstants {
-        public static final int LEFT_MOTOR1_CAN_ID = 0;
-        public static final int LEFT_MOTOR2_CAN_ID = 1;
-        public static final int RIGHT_MOTOR1_CAN_ID = 2;
-        public static final int RIGHT_MOTOR2_CAN_ID = 3;
+        public static final int LEFT_MOTOR1_CAN_ID = 1;
+        public static final int LEFT_MOTOR2_CAN_ID = 2;
+        public static final int RIGHT_MOTOR1_CAN_ID = 3;
+        public static final int RIGHT_MOTOR2_CAN_ID = 4;
 
         // TODO: Tune this value
         public static final double TRACK_WIDTH_METERS = 0.69;
@@ -73,6 +73,10 @@ public final class Constants {
         //TODO: What should this be?
         public static final DCMotor GEARBOX = DCMotor.getNEO(1);
         public static final boolean ENCODER_REVERSED = false;
+
+        public static final boolean RIGHT_MOTOR_INVERT = true;
+        public static final boolean LEFT_MOTOR_INVERT = false;
+        public static final boolean FOLLOWER_INVERT = false;
     }
 
     public static final class OIConstants {

@@ -10,7 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.Drivetrain;
 import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -51,8 +51,8 @@ public class RobotContainer {
      */
     public RobotContainer() {
         drivetrain = new Drivetrain();
-        driver = new CmdPatriBoxController(OIConstants.DRIVER_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
-        operator = new CmdPatriBoxController(OIConstants.OPERATOR_CONTROLLER_PORT, OIConstants.DRIVER_DEADZONE);
+        driver = new CmdPatriBoxController(ControllerConstants.DRIVER_CONTROLLER_PORT, ControllerConstants.DRIVER_DEADZONE);
+        operator = new CmdPatriBoxController(ControllerConstants.OPERATOR_CONTROLLER_PORT, ControllerConstants.DRIVER_DEADZONE);
         
         // autoSelector = new SendableChooser<>();
 
@@ -100,7 +100,7 @@ public class RobotContainer {
          * add the autonomous commands to the auto selector, to then choose from
          * on the smart dashboard
          */
-        addAutos();
+        // addAutos();
     }
     
     /**
@@ -139,12 +139,12 @@ public class RobotContainer {
      */
     private void addAutos(){
         // Here is an example using PathPlanner
-        autoSelector.setDefaultOption("DEFAULT", new PathPlannerAuto("DEFAULT"));
+        autoSelector.setDefaultOption("DEFAULT", drivetrain.followPathCommand("DEFAULT"));
         // Here is an example not using PathPlanner
         autoSelector.addOption("MOBILITY", drivetrain.run(() -> drivetrain.drive(1, 0)).withTimeout(2).asProxy());
         // Here is an example using PathPlanner with events and a named command
-        autoSelector.addOption("anotherAuto", drivetrain.followPathCommand("anotherAuto"));
-        autoSelector.addOption("anotherAutoWithEvents", drivetrain.followEventPathCommand("anotherAutoWithEvents"));
+        // autoSelector.addOption("anotherAuto", drivetrain.followPathCommand("anotherAuto"));
+        // autoSelector.addOption("anotherAutoWithEvents", drivetrain.followEventPathCommand("anotherAutoWithEvents"));
         
         SmartDashboard.putData(autoSelector);
     }

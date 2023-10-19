@@ -28,73 +28,103 @@ public final class Constants {
      * for each new robot and the constants adjusted as needed. It is not intended
      * to be used directly as the Constants class for a robot.
      */
-    public static final class DriveConstants {
-        public static final int LEFT_MOTOR1_CAN_ID = 1;
-        public static final int LEFT_MOTOR2_CAN_ID = 2;
-        public static final int RIGHT_MOTOR1_CAN_ID = 3;
-        public static final int RIGHT_MOTOR2_CAN_ID = 4;
+    public final static class ControllerConstants {
+      public static final int DRIVER_CONTROLLER_PORT = 0;
+      public static final int OPERATOR_CONTROLLER_PORT = 1;
 
-        // TODO: Tune this value
-        public static final double TRACK_WIDTH_METERS = 0.69;
-        public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
-                TRACK_WIDTH_METERS);
+      public static final double DRIVER_DEADBAND_FORWARD = 0.05;
+      public static final double DRIVER_DEADBAND_TURN = 0.03;
 
-        // TODO: Tune these values for your drive
-        public static final double GEAR_RATIO = 5.95;
-        public static final double WHEEL_DIAMETER_METERS = 0.15;
-        public static final double ENCODER_POSITION_CONVERSION_FACTOR =
-                // Assumes the encoders are directly mounted on the wheel shafts
-                (WHEEL_DIAMETER_METERS * Math.PI) / GEAR_RATIO;
+      public static final double BETA = 2;
+      public static final double ZETA = 0.7;
 
-        /*
-         * These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT! These
-         * characterization values MUST be determined either experimentally or
-         * theoretically for *your* robot's drive.
-         */        
-        //TODO: Tune this value
-        public static final double ks_VOLTS = 0.22;
-        public static final double kv_VOLT_SECONDS_PER_METER = 1.98;
-        public static final double ka_VOLT_SECONDS_SQUARED_PER_METER = 0.2;
+      public static final double RAMSETE_KP = 1;
+      public static final double RAMSETE_KI = 0;
+      public static final double REMSETE_KD = 0;
+      public static final double DRIVER_DEADZONE = 0.1;
+  }
 
-        // Example value only - as above, this must be tuned for your drive!
-        //TODO: Tune this value
-        public static final double kp_DRIVE_VEL = 8.5;
-        
-        //TODO: Tune these values
-        private static final double kv_VOLT_SECONDS_PER_RADIAN = 1.5;
-        private static final double ka_VOLT_SECONDS_SQUARED_PER_RADIAN = 0.3;
-        public static final LinearSystem<N2, N2, N2> DRIVETRIAN_PLANT = 
+  public final static class DrivetrainConstants {
+
+      public static final double WHEEL_DIAMETER_METERS = 0.15;
+      public static final double WHEEL_CIRC_METERS = WHEEL_DIAMETER_METERS * Math.PI;
+      public static final double DRIVETRAIN_GEAR_RATIO = 5.95;
+      public static final double DRIVING_ENCODER_POS_FACTOR = WHEEL_CIRC_METERS / DRIVETRAIN_GEAR_RATIO; // meters
+      public static final double DRIVING_ENCODER_VEL_FACTOR = DRIVING_ENCODER_POS_FACTOR / 60; // m/s
+
+      public static final double DRIVING_SPEED_MULTIPLIER = 1;
+      //TODO: Tune this value
+      public static final double ks_VOLTS = 0.22;
+      public static final double kv_VOLT_SECONDS_PER_METER = 1.98;
+      public static final double ka_VOLT_SECONDS_SQUARED_PER_METER = 0.2;
+
+      // Example value only - as above, this must be tuned for your drive!
+      //TODO: Tune this value
+      public static final double kp_DRIVE_VEL = 8.5;
+      
+      //TODO: Tune these values
+      private static final double kv_VOLT_SECONDS_PER_RADIAN = 1.5;
+      private static final double ka_VOLT_SECONDS_SQUARED_PER_RADIAN = 0.3;
+      
+      public static final double GEAR_RATIO = 5.95;
+
+      public static final int LEFT_MOTOR_FRONT_CAN_ID = 1;
+      public static final int LEFT_MOTOR_FOLLOWER_CAN_ID = 2;
+
+      public static final int RIGHT_MOTOR_FRONT_CAN_ID = 3;
+      public static final int RIGHT_MOTOR_FOLLOWER_CAN_ID = 4;
+      public static final LinearSystem<N2, N2, N2> DRIVETRIAN_PLANT = 
             LinearSystemId.identifyDrivetrainSystem(
                 kv_VOLT_SECONDS_PER_METER,
                 ka_VOLT_SECONDS_SQUARED_PER_METER,
                 kv_VOLT_SECONDS_PER_RADIAN,
                 ka_VOLT_SECONDS_SQUARED_PER_RADIAN
             );
-        //TODO: What should this be?
-        public static final DCMotor GEARBOX = DCMotor.getNEO(1);
-        public static final boolean ENCODER_REVERSED = false;
+      public static final DCMotor GEARBOX = DCMotor.getNEO(1);
 
-        public static final boolean RIGHT_MOTOR_INVERT = true;
-        public static final boolean LEFT_MOTOR_INVERT = false;
-        public static final boolean FOLLOWER_INVERT = false;
-    }
+      // These bools control if the drivetrain is flipped or not on a side
+      // change these if one is not moving the right direction
+      public static final boolean RIGHT_MOTOR_INVERT = true;
+      public static final boolean LEFT_MOTOR_INVERT = false;
 
-    public static final class OIConstants {
-        public static final int DRIVER_CONTROLLER_PORT = 0;
-        public static final int OPERATOR_CONTROLLER_PORT = 1;
-        // Deadzone for the driver's controller
-        //(must be tuned for the driver's controller and 
-        // driving style)
-        public static final double DRIVER_DEADZONE = 0.07;
-    }
+      // These bools are based upon the gearbox, and will not be the issue if
+      // there are inversions in the drivetrain
+      public static final boolean RIGHT_FOLLOWER_INVERTED = false;
+      public static final boolean LEFT_FOLLOWER_INVERTED = false;
 
-    public static final class AutoConstants {
-        public static final double MAX_SPEED_METERS_PER_SECOND = 3;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1;
+      // TODO: Use these values
+      public static final double TURNING_P = 0.6;
+      public static final double TURNING_I = 0;
+      public static final double TURNING_D = 0.1;
 
-        // Reasonable baseline values for a RAMSETE follower in units of meters and
-        // seconds
-        public static final double RAMSETE_B = 2;
-        public static final double RAMSETE_ZETA = 0.7;
-    }
+      public static final double DRIVING_P = 0.7;
+      public static final double DRIVING_I = 0;
+      public static final double DRIVING_D = 0.1;
+
+      public static final double SLEW_RATE_TURN_NEGATIVE = -5;
+      public static final double SLEW_RATE_TURN_POSITIVE = 5;
+      public static final double SLEW_RATE_DRIVE_POSITIVE = 5;
+      public static final double SLEW_RATE_DRIVE_NEGATIVE = -5;
+
+      // TODO: Tune these values
+      public static final int DRIVE_TO_DISTANCE_TOLERANCE = 4;
+      public static final double ANGLE_TOLERANCE = 0.1;
+
+      public static final double TRACK_WIDTH_METERS = 0.5588;
+
+      public static final double MAX_DRIVE_VELOCITY = 4;
+      public static final double MAX_DRIVE_ACCELERATION = 1.5;
+
+      public static final double MAX_DRIVE_VOLTAGE = 7;
+
+      public static final double kS = 0.0;
+      public static final double kV = 0.0;
+      public static final double kA = 0.0;
+
+      public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
+              DrivetrainConstants.TRACK_WIDTH_METERS);
+
+      public static final double MAX_DRIVE_SPEED = 0.8;
+      public static final boolean ENCODER_REVERSED = false;
+  }
 }

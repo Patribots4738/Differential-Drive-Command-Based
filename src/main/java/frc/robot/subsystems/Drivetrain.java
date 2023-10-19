@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.DrivetrainConstants;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.ADIS16470_IMUSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
@@ -72,10 +72,10 @@ public class Drivetrain extends SubsystemBase {
          * positive makes them both go forward.
          */
         // Initialize motors
-        leftMotorLead = new CANSparkMax(DriveConstants.LEFT_MOTOR1_CAN_ID, MotorType.kBrushless);
-        leftMotorFollower = new CANSparkMax(DriveConstants.LEFT_MOTOR2_CAN_ID, MotorType.kBrushless);
-        rightMotorLead = new CANSparkMax(DriveConstants.RIGHT_MOTOR1_CAN_ID, MotorType.kBrushless);
-        rightMotorFollower = new CANSparkMax(DriveConstants.RIGHT_MOTOR2_CAN_ID, MotorType.kBrushless);
+        leftMotorLead = new CANSparkMax(DrivetrainConstants.LEFT_MOTOR_FRONT_CAN_ID, MotorType.kBrushless);
+        leftMotorFollower = new CANSparkMax(DrivetrainConstants.LEFT_MOTOR_FOLLOWER_CAN_ID , MotorType.kBrushless);
+        rightMotorLead = new CANSparkMax(DrivetrainConstants.RIGHT_MOTOR_FRONT_CAN_ID, MotorType.kBrushless);
+        rightMotorFollower = new CANSparkMax(DrivetrainConstants.RIGHT_MOTOR_FOLLOWER_CAN_ID, MotorType.kBrushless);
         // Initialize drivetrain
         drivetrain = new DifferentialDrive(rightMotorLead, leftMotorLead);
         // Initialize encoders
@@ -98,23 +98,23 @@ public class Drivetrain extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             drivetrainSimulator = new DifferentialDrivetrainSim(
-                DriveConstants.DRIVETRIAN_PLANT,
-                DriveConstants.GEARBOX,
-                DriveConstants.GEAR_RATIO,
-                DriveConstants.TRACK_WIDTH_METERS,
-                (DriveConstants.WHEEL_DIAMETER_METERS / 2.0),
+                DrivetrainConstants.DRIVETRIAN_PLANT,
+                DrivetrainConstants.GEARBOX,
+                DrivetrainConstants.GEAR_RATIO,
+                DrivetrainConstants.TRACK_WIDTH_METERS,
+                (DrivetrainConstants.WHEEL_DIAMETER_METERS / 2.0),
                 VecBuilder.fill(0, 0, 0.0001, 0.1, 0.1, 0.005, 0.005)
             );
 
             leftEncoderSim = new EncoderSim(new Encoder(
-                DriveConstants.LEFT_MOTOR1_CAN_ID, 
-                DriveConstants.LEFT_MOTOR2_CAN_ID,
-                DriveConstants.ENCODER_REVERSED));
+                DrivetrainConstants.LEFT_MOTOR_FRONT_CAN_ID, 
+                DrivetrainConstants.LEFT_MOTOR_FOLLOWER_CAN_ID,
+                DrivetrainConstants.ENCODER_REVERSED));
 
             rightEncoderSim = new EncoderSim(new Encoder(
-                DriveConstants.RIGHT_MOTOR1_CAN_ID, 
-                DriveConstants.RIGHT_MOTOR2_CAN_ID,
-                DriveConstants.ENCODER_REVERSED));
+                DrivetrainConstants.RIGHT_MOTOR_FRONT_CAN_ID, 
+                DrivetrainConstants.RIGHT_MOTOR_FOLLOWER_CAN_ID,
+                DrivetrainConstants.ENCODER_REVERSED));
 
             gyroSim = new ADIS16470_IMUSim(gyro);
 
@@ -150,12 +150,10 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         // Update the odometry in the periodic block
-        CommandScheduler.getInstance().schedule(
-          new InstantCommand(() -> odometry.update(
+        odometry.update(
             getRotation2d(), 
             leftEncoder.getPosition(), 
-            rightEncoder.getPosition()))
-        );
+            rightEncoder.getPosition());
     }
 
     /**
@@ -246,7 +244,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void tankDriveChassisSpeeds(ChassisSpeeds speeds) {
-        var wheelSpeeds = DriveConstants.DRIVE_KINEMATICS.toWheelSpeeds(speeds);
+        var wheelSpeeds = DrivetrainConstants.DRIVE_KINEMATICS.toWheelSpeeds(speeds);
         leftMotorLead.set(wheelSpeeds.leftMetersPerSecond);
         rightMotorLead.set(wheelSpeeds.rightMetersPerSecond);
         drivetrain.feed();
@@ -370,16 +368,16 @@ public class Drivetrain extends SubsystemBase {
                 rightMotorLead.restoreFactoryDefaults();
                 rightMotorFollower.restoreFactoryDefaults();
 
-                leftMotorLead.setInverted(DriveConstants.LEFT_MOTOR_INVERT);
-                rightMotorLead.setInverted(DriveConstants.RIGHT_MOTOR_INVERT);
+                leftMotorLead.setInverted(DrivetrainConstants.LEFT_MOTOR_INVERT);
+                rightMotorLead.setInverted(DrivetrainConstants.RIGHT_MOTOR_INVERT);
         
-                leftEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
-                rightEncoder.setPositionConversionFactor(DriveConstants.ENCODER_POSITION_CONVERSION_FACTOR);
+                leftEncoder.setPositionConversionFactor(DrivetrainConstants.DRIVING_ENCODER_POS_FACTOR);
+                rightEncoder.setPositionConversionFactor(DrivetrainConstants.DRIVING_ENCODER_POS_FACTOR);
             
                 resetEncoders();
 
-                leftMotorFollower.follow(leftMotorLead, DriveConstants.FOLLOWER_INVERT);
-                rightMotorFollower.follow(rightMotorLead, DriveConstants.FOLLOWER_INVERT);
+                leftMotorFollower.follow(leftMotorLead, DrivetrainConstants.LEFT_FOLLOWER_INVERTED);
+                rightMotorFollower.follow(rightMotorLead, DrivetrainConstants.RIGHT_FOLLOWER_INVERTED);
               }
             ).ignoringDisable(true).asProxy()
         );

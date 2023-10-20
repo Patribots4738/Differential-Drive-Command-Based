@@ -12,6 +12,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,7 +24,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.Constants.DrivetrainConstants;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.ADIS16470_IMUSim;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
@@ -98,12 +98,19 @@ public class Drivetrain extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             drivetrainSimulator = new DifferentialDrivetrainSim(
-                DrivetrainConstants.DRIVETRIAN_PLANT,
                 DrivetrainConstants.GEARBOX,
                 DrivetrainConstants.GEAR_RATIO,
-                DrivetrainConstants.TRACK_WIDTH_METERS,
+                7.5,
+                60.0,
                 (DrivetrainConstants.WHEEL_DIAMETER_METERS / 2.0),
-                VecBuilder.fill(0, 0, 0.0001, 0.1, 0.1, 0.005, 0.005)
+                DrivetrainConstants.TRACK_WIDTH_METERS,
+                VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
+                // DrivetrainConstants.DRIVETRIAN_PLANT,
+                // DrivetrainConstants.GEARBOX,
+                // DrivetrainConstants.GEAR_RATIO,
+                // DrivetrainConstants.TRACK_WIDTH_METERS,
+                // (DrivetrainConstants.WHEEL_DIAMETER_METERS / 2.0),
+                // VecBuilder.fill(0, 0, 0.0001, 0.1, 0.1, 0.005, 0.005)
             );
 
             leftEncoderSim = new EncoderSim(new Encoder(
@@ -116,15 +123,18 @@ public class Drivetrain extends SubsystemBase {
                 DrivetrainConstants.RIGHT_MOTOR_FOLLOWER_CAN_ID,
                 DrivetrainConstants.ENCODER_REVERSED));
 
-            gyroSim = new ADIS16470_IMUSim(gyro);
+            leftEncoderSim.setDistancePerPulse(2 * Math.PI * (DrivetrainConstants.WHEEL_DIAMETER_METERS / 2) / DrivetrainConstants.ENCODER_RESOLUTION);
+            rightEncoderSim.setDistancePerPulse(2 * Math.PI * (DrivetrainConstants.WHEEL_DIAMETER_METERS / 2) / DrivetrainConstants.ENCODER_RESOLUTION);
 
+            gyroSim = new ADIS16470_IMUSim(gyro);
             simField = new Field2d();
-            // SmartDashboard.putData("Field", simField);
+            SmartDashboard.putData("FieldSim", simField);
         } else {
             drivetrainSimulator = null;
             leftEncoderSim = null;
             rightEncoderSim = null;
             gyroSim = null;
+
             simField = null;
         }
 
@@ -154,6 +164,7 @@ public class Drivetrain extends SubsystemBase {
             getRotation2d(), 
             leftEncoder.getPosition(), 
             rightEncoder.getPosition());
+        simField.setRobotPose(getPose());
     }
 
     /**
@@ -161,6 +172,7 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void simulationPeriodic() {
+
         drivetrainSimulator.setInputs(
             leftMotorLead.get() * RobotController.getBatteryVoltage(),
             rightMotorLead.get() * RobotController.getBatteryVoltage());

@@ -80,7 +80,7 @@ public final class Constants {
                 kv_VOLT_SECONDS_PER_RADIAN,
                 ka_VOLT_SECONDS_SQUARED_PER_RADIAN
             );
-      public static final DCMotor GEARBOX = DCMotor.getNEO(1);
+      public static final DCMotor GEARBOX = DCMotor.getNEO(2);
 
       // These bools control if the drivetrain is flipped or not on a side
       // change these if one is not moving the right direction
@@ -126,5 +126,6 @@ public final class Constants {
 
       public static final double MAX_DRIVE_SPEED = 0.8;
       public static final boolean ENCODER_REVERSED = false;
+        public static final double ENCODER_RESOLUTION = 42;
   }
 }

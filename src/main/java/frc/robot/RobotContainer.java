@@ -35,8 +35,8 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
 
     // The driver's controller
-    CommandXboxController driver;
-    CommandXboxController operator;
+    CmdPatriBoxController driver;
+    CmdPatriBoxController operator;
 
     SendableChooser<Command> autoSelector;
 

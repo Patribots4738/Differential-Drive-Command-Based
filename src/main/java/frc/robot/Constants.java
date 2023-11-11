@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean
@@ -30,14 +28,7 @@ public final class Constants {
         public static final int RIGHT_MOTOR1_CAN_ID = 2;
         public static final int RIGHT_MOTOR2_CAN_ID = 3;
 
-        public static final int[] LEFT_ENCODER_CAN_ID = new int[] { 0, 1 };
-        public static final int[] RIGHT_ENCODER_CAN_ID = new int[] { 2, 3 };
-        public static final boolean LEFT_ENCODER_REVERSED = false;
-        public static final boolean RIGHT_ENCODER_REVERSED = true;
-
         public static final double TRACK_WIDTH_METERS = 0.69;
-        public static final DifferentialDriveKinematics DRIVE_KINEMATICS = new DifferentialDriveKinematics(
-                TRACK_WIDTH_METERS);
 
         public static final double GEAR_RATIO = 5.95;
         public static final double WHEEL_DIAMETER_METERS = 0.15;
@@ -45,17 +36,6 @@ public final class Constants {
                 // Assumes the encoders are directly mounted on the wheel shafts
                 (WHEEL_DIAMETER_METERS * Math.PI) / GEAR_RATIO;
 
-        /*
-         * These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT! These
-         * characterization values MUST be determined either experimentally or
-         * theoretically for *your* robot's drive.
-         */        
-        public static final double ks_VOLTS = 0.22;
-        public static final double kv_VOLT_SECONDS_PER_METER = 1.98;
-        public static final double ka_VOLT_SECONDS_SQUARED_PER_METER = 0.2;
-
-        // Example value only - as above, this must be tuned for your drive!
-        public static final double kp_DRIVE_VEL = 8.5;
     }
 
     public static final class OIConstants {

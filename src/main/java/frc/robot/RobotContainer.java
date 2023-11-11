@@ -4,15 +4,11 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Drivetrain;
-import io.github.oblarg.oblog.annotations.Log;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -35,13 +31,7 @@ public class RobotContainer {
     CommandXboxController operator;
 
     SendableChooser<Command> autoSelector;
-
-    
-    // This makes it very easy to add data to the dashboard, 
-    // just add {@Log} in the line above
-    @Log
-    private Field2d field = new Field2d();
-
+    //TODO: Make a Field that update the pose of the robot
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -55,21 +45,17 @@ public class RobotContainer {
          * Configure the default command for the drivetrain subsystem, this is what
          * will be run when no other commands are running that require the drivetrain.
          */
-        drivetrain.setDefaultCommand(
-            /*
-             * This Run Command will drive our robot using arcade drive style, i.e. using
-             * the left stick to control forward/backward movement and the right stick to
-             * control turning.
-             * 
-             * <p>
-             * The Run Command is a command that will be scheduled through the 
-             * Command Scheduler and will run until it is canceled. 
-             */
-            new RunCommand(
-                () -> drivetrain.drive(
-                    MathUtil.applyDeadband(driver.getLeftY(), OIConstants.DRIVER_DEADZONE), 
-                    MathUtil.applyDeadband(driver.getRightX(), OIConstants.DRIVER_DEADZONE)),
-                    drivetrain));
+        //TODO: Change the default command to a RunCommand that drives the robot using arcade drive style
+        /*
+         * This Run Command will drive our robot using arcade drive style, i.e. using
+         * the left stick to control forward/backward movement and the right stick to
+         * control turning.
+         * 
+         * <p>
+         * The Run Command is a command that will be scheduled through the 
+         * Command Scheduler and will run until it is canceled. 
+         */
+        drivetrain.setDefaultCommand(new RunCommand(() -> {}));
                     
         /*
          * Configure the button bindings,
@@ -83,9 +69,6 @@ public class RobotContainer {
          */
         configureButtonBindings();
 
-        // Add the field to the dashboard
-        SmartDashboard.putData("Field", field);
-
         /*
          * add the autonomous commands to the auto selector, to then choose from
          * on the smart dashboard
@@ -97,11 +80,7 @@ public class RobotContainer {
      * This the the periodic method that is called every 20ms when the robot is
      * enabled.
      */
-    public void periodic() {
-
-        // Update the field
-        field.setRobotPose(drivetrain.getPose());
-    }
+    public void periodic() {}
 
     /**
      * Add the autonomous commands to the auto selector, to then choose from
@@ -127,9 +106,7 @@ public class RobotContainer {
      * {@link JoystickButton}.
      */
     private void configureButtonBindings() {
-        driver.leftStick().toggleOnTrue(
-            Commands.run(() -> drivetrain.setMaxOutput(0.5))
-                .finallyDo((end) -> drivetrain.setMaxOutput(1)));
+        // TODO: On click of the left stick, toggle the max speed of the robot between 50% and 100%
     }
 
     /*
